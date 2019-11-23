@@ -2,12 +2,65 @@ import React, { useEffect } from 'react'
 import { StyleSheet, View, Button } from 'react-native'
 import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
+import * as Location from 'expo-location'
+import * as TaskManager from 'expo-task-manager'
+
+const GEOFENCING_TASK_NAME = 'GEOFENCING_TASK'
+
+TaskManager.defineTask(GEOFENCING_TASK_NAME, ({ data: { eventType, region }, error }: any) => {
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  let message
+  if (eventType === Location.GeofencingEventType.Enter) {
+    message = `あなたは${region.identifier}の近くにいます`
+    Notifications.presentLocalNotificationAsync({
+      title: '私は見ている',
+      body: message,
+      data: {
+        title: '私は見ている',
+        body: message,  
+      },
+      ios: {
+        _displayInForeground: true
+      }
+    })
+  } else if(eventType === Location.GeofencingEventType.Exit) {
+    message = `あなたは${region.identifier}から離れています`
+  }
+  console.log(message)  
+})
 
 export default function App() {
   useEffect(() => {
+
+    Permissions.getAsync(Permissions.LOCATION)
+    .then(({ status, permissions }) => {
+      if (status !== 'granted') throw new Error('You do not have permission for using location')
+      console.log(permissions)
+      if (permissions.location.ios.scope !== 'always') throw Error('You have to allow this app to always track device location')
+      return Location.startGeofencingAsync(GEOFENCING_TASK_NAME, [
+        {
+          identifier: 'スカイツリー',
+          latitude: 35.71005,
+          longitude: 139.810609,
+          radius: 300
+        },
+        {
+          identifier: '東京タワー',
+          latitude: 35.658581,
+          longitude: 139.745433,
+          radius: 300
+        },
+      ])
+    })
+    .then(() => console.log('geofencing started'))
+    .catch(err => alert(err.message))
+
     Notifications.addListener(notification => {     
       console.log(notification)
-      alert(notification.data.title)
+      alert(`私は見ている： ${notification.data.body}`)
     })
   }, [])
 
