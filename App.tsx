@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { StyleSheet, View, Button } from 'react-native'
+import { StyleSheet, View, Button, Platform } from 'react-native'
 import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import * as Location from 'expo-location'
@@ -20,7 +20,7 @@ TaskManager.defineTask(GEOFENCING_TASK_NAME, ({ data: { eventType, region }, err
       body: message,
       data: {
         title: '私は見ている',
-        body: message,  
+        body: message,
       },
       ios: {
         _displayInForeground: true
@@ -29,17 +29,21 @@ TaskManager.defineTask(GEOFENCING_TASK_NAME, ({ data: { eventType, region }, err
   } else if(eventType === Location.GeofencingEventType.Exit) {
     message = `あなたは${region.identifier}から離れています`
   }
-  console.log(message)  
+  console.log(message)
 })
 
 export default function App() {
   useEffect(() => {
-
     Permissions.getAsync(Permissions.LOCATION)
     .then(({ status, permissions }) => {
       if (status !== 'granted') throw new Error('You do not have permission for using location')
       console.log(permissions)
-      if (permissions.location.ios.scope !== 'always') throw Error('You have to allow this app to always track device location')
+
+      // [only iOS]
+      // App have to get 'always' permission to use backgrand location tracking
+      if (Platform.OS === 'ios' && permissions.location.ios.scope !== 'always') {
+        throw Error('You have to allow this app to always track device location')
+      }
       return Location.startGeofencingAsync(GEOFENCING_TASK_NAME, [
         {
           identifier: 'スカイツリー',
@@ -58,7 +62,7 @@ export default function App() {
     .then(() => console.log('geofencing started'))
     .catch(err => alert(err.message))
 
-    Notifications.addListener(notification => {     
+    Notifications.addListener(notification => {
       console.log(notification)
       alert(`私は見ている： ${notification.data.body}`)
     })
@@ -124,7 +128,7 @@ export default function App() {
         ios: {
           sound: true,
           _displayInForeground: true,
-        }        
+        }
       }, {
         time: new Date().getTime() + 5000 // 5 seconds later
       })
