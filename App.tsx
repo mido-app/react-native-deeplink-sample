@@ -132,7 +132,7 @@ export default function App() {
 
   const testSendingNotification = async function () {
     try {
-      const notificationId = await Notifications.presentLocalNotificationAsync({
+      await Notifications.presentLocalNotificationAsync({
         title: 'テストローカル通知',
         body: 'ローカル通知の送信テストです',
         data: {
@@ -144,9 +144,6 @@ export default function App() {
           // _displayInForeground: true,
         }
       })
-      const currentTimestamp = moment().format('YYYY-MM-DD HH:mm:ss')
-      setNotificationHistory([`[${currentTimestamp}] テスト通知を送信しました`, ...notificationHistory])
-      console.log(notificationId)
     } catch (err) {
       console.error(err)
     }
@@ -154,7 +151,7 @@ export default function App() {
 
   const testSendingScheduledNotification = async function () {
     try {
-      const notificationId = await Notifications.scheduleLocalNotificationAsync({
+      await Notifications.scheduleLocalNotificationAsync({
         title: 'テストローカル通知',
         body: 'ローカル通知の送信テストです',
         data: {
@@ -168,9 +165,6 @@ export default function App() {
       }, {
         time: new Date().getTime() + 5000 // 5 seconds later
       })
-      const currentTimestamp = moment().format('YYYY-MM-DD HH:mm:ss')
-      setNotificationHistory([`[${currentTimestamp}] テスト通知を送信しました`, ...notificationHistory])
-      console.log(notificationId)
     } catch (err) {
       console.error(err)
     }
