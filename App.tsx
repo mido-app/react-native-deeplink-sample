@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react'
-import { StyleSheet, View, Button, Platform } from 'react-native'
+import React, { useState, useEffect } from 'react'
+import { StyleSheet, Text, View, Button, FlatList, Platform } from 'react-native'
 import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import * as Location from 'expo-location'
@@ -15,24 +15,27 @@ TaskManager.defineTask(GEOFENCING_TASK_NAME, ({ data: { eventType, region }, err
   let message
   if (eventType === Location.GeofencingEventType.Enter) {
     message = `あなたは${region.identifier}の近くにいます`
-    Notifications.presentLocalNotificationAsync({
-      title: '私は見ている',
-      body: message,
-      data: {
-        title: '私は見ている',
-        body: message,
-      },
-      ios: {
-        _displayInForeground: true
-      }
-    })
   } else if(eventType === Location.GeofencingEventType.Exit) {
     message = `あなたは${region.identifier}から離れています`
   }
+
+  Notifications.presentLocalNotificationAsync({
+    title: '私は見ている',
+    body: message,
+    data: {
+      title: '私は見ている',
+      body: message,
+    },
+    ios: {
+      _displayInForeground: true
+    }
+  })
   console.log(message)
 })
 
 export default function App() {
+  const [ notificationHistory, setNotificationHistory ] = useState(new Array<string>())
+
   useEffect(() => {
     Permissions.getAsync(Permissions.LOCATION)
     .then(({ status, permissions }) => {
@@ -44,6 +47,7 @@ export default function App() {
       if (Platform.OS === 'ios' && permissions.location.ios.scope !== 'always') {
         throw Error('You have to allow this app to always track device location')
       }
+
       return Location.startGeofencingAsync(GEOFENCING_TASK_NAME, [
         {
           identifier: 'スカイツリー',
@@ -64,7 +68,8 @@ export default function App() {
 
     Notifications.addListener(notification => {
       console.log(notification)
-      alert(`私は見ている： ${notification.data.body}`)
+      // alert(`私は見ている： ${notification.data.body}`)
+      setNotificationHistory(prevHistory => [notification.data.body, ...prevHistory])      
     })
   }, [])
 
@@ -107,9 +112,10 @@ export default function App() {
         },
         ios: {
           sound: true,
-          _displayInForeground: true,
+          // _displayInForeground: true,
         }
       })
+      setNotificationHistory(['テスト通知を送信しました', ...notificationHistory])
       console.log(notificationId)
     } catch (err) {
       console.error(err)
@@ -127,11 +133,12 @@ export default function App() {
         },
         ios: {
           sound: true,
-          _displayInForeground: true,
+          // _displayInForeground: true,
         }
       }, {
         time: new Date().getTime() + 5000 // 5 seconds later
       })
+      setNotificationHistory(['テスト通知を送信しました', ...notificationHistory])
       console.log(notificationId)
     } catch (err) {
       console.error(err)
@@ -148,6 +155,12 @@ export default function App() {
       <Button title="Get user facing notification permission" onPress={ () => getPermission(Permissions.USER_FACING_NOTIFICATIONS) } />
       <Button title="Test sending notification just now" onPress={ () => testSendingNotification() } />
       <Button title="Test sending notification 5 seconds later" onPress={ () => testSendingScheduledNotification() } />
+      <FlatList
+        data={ notificationHistory }
+        renderItem={ ({ item }) => (<Text>{ item }</Text>) }
+        style={ { backgroundColor: '#ffffff' } }
+        keyExtractor={ ( item, index ) => `${item}-${index}` }
+      />
     </View>
   )
 }
