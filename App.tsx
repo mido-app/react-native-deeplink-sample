@@ -98,7 +98,7 @@ export default function App() {
 
     Notifications.addListener(notification => {
       const currentTimestamp = moment().format('YYYY-MM-DD HH:mm:ss')
-      setNotificationHistory(prevHistory => [`[${currentTimestamp}] ${notification.data.body}`, ...prevHistory])
+      setNotificationHistory(prevHistory => [`[${currentTimestamp}] ${notification.data.body}`, ...prevHistory].slice(0, 50))
     })
   }, [])
 
