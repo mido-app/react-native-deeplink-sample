@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react'
-import { StyleSheet, Text, View, Button, FlatList, Platform } from 'react-native'
+import { StyleSheet, Text, View, Button, FlatList, Platform, AsyncStorage } from 'react-native'
 import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import * as Location from 'expo-location'
@@ -7,6 +7,7 @@ import * as TaskManager from 'expo-task-manager'
 import moment from 'moment'
 
 const GEOFENCING_TASK_NAME = 'GEOFENCING_TASK'
+const NOTIFICATION_HISTORY_KEY = 'NOTIFICATION_HISTORY'
 
 TaskManager.defineTask(GEOFENCING_TASK_NAME, ({ data: { eventType, region }, error }: any) => {
   if (error) {
@@ -38,6 +39,14 @@ export default function App() {
   const [ notificationHistory, setNotificationHistory ] = useState(new Array<string>())
 
   useEffect(() => {
+    AsyncStorage.getItem(NOTIFICATION_HISTORY_KEY)
+    .then(value => {
+      if (value !== null) {
+        console.log('notification history loaded')
+        setNotificationHistory(JSON.parse(value))
+      }
+    })
+
     Permissions.getAsync(Permissions.LOCATION)
     .then(({ status, permissions }) => {
       if (status !== 'granted') throw new Error('You do not have permission for using location')
@@ -101,6 +110,11 @@ export default function App() {
       setNotificationHistory(prevHistory => [`[${currentTimestamp}] ${notification.data.body}`, ...prevHistory].slice(0, 50))
     })
   }, [])
+
+  useEffect(() => {
+    AsyncStorage.setItem(NOTIFICATION_HISTORY_KEY, JSON.stringify(notificationHistory))
+    .then(() => console.log('notification history saved'))
+  }, [ notificationHistory ])
 
   const checkPermission = async function (permission: Permissions.PermissionType) {
     try {
