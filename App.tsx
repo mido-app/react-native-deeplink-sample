@@ -4,6 +4,7 @@ import { Notifications } from 'expo'
 import * as Permissions from 'expo-permissions'
 import * as Location from 'expo-location'
 import * as TaskManager from 'expo-task-manager'
+import moment from 'moment'
 
 const GEOFENCING_TASK_NAME = 'GEOFENCING_TASK'
 
@@ -61,15 +62,43 @@ export default function App() {
           longitude: 139.745433,
           radius: 300
         },
-      ])
+        {
+          identifier: '晴海トリトンスクエア',
+          latitude: 35.657413,
+          longitude: 139.782514,
+          radius: 300
+        },
+        {
+          identifier: '東中野駅',
+          latitude: 35.706229,
+          longitude: 139.68381,
+          radius: 300
+        },
+        {
+          identifier: '新宿駅',
+          latitude: 35.689607,
+          longitude: 139.700571,
+          radius: 300
+        },
+        {
+          identifier: '大門駅',
+          latitude: 35.656719,
+          longitude: 139.755572,
+          radius: 300
+        },
+        {
+          identifier: '勝どき駅',
+          latitude: 35.658979,
+          longitude: 139.777149,
+          radius: 300
+        },      ])
     })
     .then(() => console.log('geofencing started'))
     .catch(err => alert(err.message))
 
     Notifications.addListener(notification => {
-      console.log(notification)
-      // alert(`私は見ている： ${notification.data.body}`)
-      setNotificationHistory(prevHistory => [notification.data.body, ...prevHistory])      
+      const currentTimestamp = moment().format('YYYY-MM-DD HH:mm:ss')
+      setNotificationHistory(prevHistory => [`[${currentTimestamp}] ${notification.data.body}`, ...prevHistory])
     })
   }, [])
 
@@ -115,7 +144,8 @@ export default function App() {
           // _displayInForeground: true,
         }
       })
-      setNotificationHistory(['テスト通知を送信しました', ...notificationHistory])
+      const currentTimestamp = moment().format('YYYY-MM-DD HH:mm:ss')
+      setNotificationHistory([`[${currentTimestamp}] テスト通知を送信しました`, ...notificationHistory])
       console.log(notificationId)
     } catch (err) {
       console.error(err)
@@ -138,7 +168,8 @@ export default function App() {
       }, {
         time: new Date().getTime() + 5000 // 5 seconds later
       })
-      setNotificationHistory(['テスト通知を送信しました', ...notificationHistory])
+      const currentTimestamp = moment().format('YYYY-MM-DD HH:mm:ss')
+      setNotificationHistory([`[${currentTimestamp}] テスト通知を送信しました`, ...notificationHistory])
       console.log(notificationId)
     } catch (err) {
       console.error(err)
@@ -157,7 +188,7 @@ export default function App() {
       <Button title="Test sending notification 5 seconds later" onPress={ () => testSendingScheduledNotification() } />
       <FlatList
         data={ notificationHistory }
-        renderItem={ ({ item }) => (<Text>{ item }</Text>) }
+        renderItem={ ({ item }) => (<View style={ styles.listItem }><Text>{ item }</Text></View>) }
         style={ { backgroundColor: '#ffffff' } }
         keyExtractor={ ( item, index ) => `${item}-${index}` }
       />
@@ -171,5 +202,12 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    paddingTop: 16,
+    paddingBottom: 16,
   },
+  listItem: {
+    backgroundColor: '#eeeeee',
+    marginVertical: 4,
+    padding: 2,
+  }
 })
