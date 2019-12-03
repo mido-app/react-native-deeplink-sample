@@ -1,9 +1,9 @@
 import React from 'react'
 import { 
   StyleSheet, 
-  Text, 
-  View, 
-  Platform 
+  Text,   
+  View,
+  Platform
 } from 'react-native'
 import * as Permissions from 'expo-permissions'
 
@@ -15,9 +15,11 @@ export default class App extends React.Component {
   
   render () {
     return (
-      <View style={styles.permissions}>
-        <Text>Notification Permission: { this.state.isNotificationPermitted ? '○' : '×' }</Text>
-        <Text>Location Permission: { this.state.isLocationPermitted ? '○' : '×' }</Text>
+      <View style={styles.container}>
+        <View>
+          <Text>Notification Permission: { this.state.isNotificationPermitted ? '○' : '×' }</Text>
+          <Text>Location Permission: { this.state.isLocationPermitted ? '○' : '×' }</Text>
+        </View>
       </View>
     )
   }
@@ -50,7 +52,7 @@ export default class App extends React.Component {
 }
 
 const styles = StyleSheet.create({
-  permissions: {
+  container: {
     flex: 1,
     backgroundColor: '#fff',
     alignItems: 'center',
