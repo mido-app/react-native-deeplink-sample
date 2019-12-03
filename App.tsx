@@ -7,6 +7,15 @@ export default class App extends React.Component {
     isNotificationPermitted: false,
     isLocationPermitted: false,
   }
+  
+  render () {
+    return (
+      <View style={styles.container}>
+        <Text>Notification Permission: { this.state.isNotificationPermitted ? '○' : '×' }</Text>
+        <Text>Location Permission: { this.state.isLocationPermitted ? '○' : '×' }</Text>
+      </View>
+    )
+  }
 
   async componentDidMount () {
     this.setState({
@@ -32,15 +41,6 @@ export default class App extends React.Component {
     if (permissionIsValid(permission)) return true
     const askResult = await Permissions.askAsync(Permissions.LOCATION)
     return permissionIsValid(askResult)
-  }
-
-  render () {
-    return (
-      <View style={styles.container}>
-        <Text>Notification Permission: { this.state.isNotificationPermitted ? '○' : '×' }</Text>
-        <Text>Location Permission: { this.state.isLocationPermitted ? '○' : '×' }</Text>
-      </View>
-    )
   }
 }
 
