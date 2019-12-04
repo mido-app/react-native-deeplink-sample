@@ -37,7 +37,7 @@ export default class App extends React.Component {
       isLocationPermitted: await this._confirmLocationPermission()
     })
 
-    Notifications.addListener(this._onReceiveNotification.bind(this))
+    Notifications.addListener(this._onReceiveNotification)
   }
 
   async _confirmNotificationPermission () {
