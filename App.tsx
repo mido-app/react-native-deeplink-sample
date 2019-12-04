@@ -9,7 +9,6 @@ import {
 import * as Permissions from 'expo-permissions'
 import { Notifications } from "expo"
 import { Notification } from 'expo/build/Notifications/Notifications.types'
-import moment from 'moment'
 
 export default class App extends React.Component {
   state = {
@@ -64,7 +63,7 @@ export default class App extends React.Component {
       title: 'テストローカル通知',
       body: 'これはテスト用のローカル通知です',
       data: {
-        message: `[${moment().format('YYYY-MM-DD HH:mm:ss')}] テストローカル通知を受け取りました`
+        message: 'テストローカル通知を受け取りました'
       },
       ios: {
         _displayInForeground: true
