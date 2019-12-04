@@ -3,9 +3,13 @@ import {
   StyleSheet, 
   Text,   
   View,
+  Button,
   Platform
 } from 'react-native'
 import * as Permissions from 'expo-permissions'
+import { Notifications } from "expo"
+import { Notification } from 'expo/build/Notifications/Notifications.types'
+import moment from 'moment'
 
 export default class App extends React.Component {
   state = {
@@ -20,6 +24,9 @@ export default class App extends React.Component {
           <Text>Notification Permission: { this.state.isNotificationPermitted ? '○' : '×' }</Text>
           <Text>Location Permission: { this.state.isLocationPermitted ? '○' : '×' }</Text>
         </View>
+        <View>
+          <Button title="Send local notification" onPress={ this._sendLocalNotification } />
+        </View>
       </View>
     )
   }
@@ -29,6 +36,8 @@ export default class App extends React.Component {
       isNotificationPermitted: await this._confirmNotificationPermission(),
       isLocationPermitted: await this._confirmLocationPermission()
     })
+
+    Notifications.addListener(this._onReceiveNotification.bind(this))
   }
 
   async _confirmNotificationPermission () {
@@ -48,6 +57,23 @@ export default class App extends React.Component {
     if (permissionIsValid(permission)) return true
     const askResult = await Permissions.askAsync(Permissions.LOCATION)
     return permissionIsValid(askResult)
+  }
+
+  async _sendLocalNotification () {
+    await Notifications.presentLocalNotificationAsync({
+      title: 'テストローカル通知',
+      body: 'これはテスト用のローカル通知です',
+      data: {
+        message: `[${moment().format('YYYY-MM-DD HH:mm:ss')}] テストローカル通知を受け取りました`
+      },
+      ios: {
+        _displayInForeground: true
+      }
+    })
+  }
+
+  _onReceiveNotification (notification: Notification) {
+    alert(notification.data.message)
   }
 }
 
