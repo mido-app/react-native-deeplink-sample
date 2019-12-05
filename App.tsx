@@ -1,7 +1,7 @@
 import React from 'react'
-import { 
-  StyleSheet, 
-  Text,   
+import {
+  StyleSheet,
+  Text,
   View,
   Button,
   Platform
@@ -9,13 +9,32 @@ import {
 import * as Permissions from 'expo-permissions'
 import { Notifications } from "expo"
 import { Notification } from 'expo/build/Notifications/Notifications.types'
+import * as Location from 'expo-location'
+import * as TaskManager from 'expo-task-manager'
+
+const TASK_NAME = 'GEOFENCE_TASK'
+
+TaskManager.defineTask(TASK_NAME, ({ data, error }: any) => {
+  if (error) throw new Error()
+
+  Notifications.presentLocalNotificationAsync({
+    title: `${data.region.id}に着きました`,
+    body: '勤怠を入力してください',
+    data: {
+      message: '勤怠を入力してください'
+    },
+    ios: {
+      _displayInForeground: false
+    }
+  })
+})
 
 export default class App extends React.Component {
   state = {
     isNotificationPermitted: false,
     isLocationPermitted: false,
   }
-  
+
   render () {
     return (
       <View style={styles.container}>
@@ -37,6 +56,14 @@ export default class App extends React.Component {
     })
 
     Notifications.addListener(this._onReceiveNotification)
+    await Location.startGeofencingAsync(TASK_NAME, [
+      {
+        identifier: '晴海トリトンスクエア',
+        latitude: 35.657413,
+        longitude: 139.782514,
+        radius: 300
+      }
+    ])
   }
 
   async _confirmNotificationPermission () {
@@ -66,7 +93,7 @@ export default class App extends React.Component {
         message: 'テストローカル通知を受け取りました'
       },
       ios: {
-        _displayInForeground: true
+        _displayInForeground: false
       }
     })
   }
